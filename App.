@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agri-Tech Dashboard</title>
+    <!-- Tailwind CSS CDN for modern, responsive styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .card {
+            @apply bg-white rounded-xl shadow-lg p-6 mb-6;
+        }
+        .text-section {
+            @apply bg-gray-50 rounded-lg p-4 mb-4 text-sm text-gray-700;
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+    <div id="loading" class="fixed inset-0 flex items-center justify-center bg-gray-100/75 z-50">
+        <div class="flex flex-col items-center">
+            <svg class="animate-spin -ml-1 mr-3 h-10 w-10 text-emerald-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p class="mt-4 text-emerald-600">Loading app...</p>
+        </div>
+    </div>
+
+    <div id="main-content" class="container mx-auto max-w-4xl opacity-0 transition-opacity duration-500">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-emerald-700 mb-2">Agri-Tech Dashboard </h1>
+            <p class="text-gray-500">Empowering farmers with smart insights.</p>
+        </header>
+
+        <!-- User/Profile Section -->
+        <div class="card">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Your Farm Profile</h2>
+            <div id="profile-display" class="hidden">
+                <p class="text-gray-600 mb-2"><span class="font-medium">User ID:</span> <span id="user-id"></span></p>
+                <p class="text-gray-600 mb-2"><span class="font-medium">Soil Type:</span> <span id="profile-soil-type"></span></p>
+                <p class="text-gray-600 mb-2"><span class="font-medium">Farm Location:</span> <span id="profile-location"></span></p>
+                <button id="edit-profile-btn" class="mt-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-4 rounded-full transition-colors">
+                    Edit Profile
+                </button>
+            </div>
+            <div id="profile-setup">
+                <form id="profile-form" class="space-y-4">
+                    <div>
+                        <label for="location" class="block text-gray-700 font-medium mb-1">Farm Location (City):</label>
+                        <input type="text" id="location" placeholder="e.g., Nairobi" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-400">
+                    </div>
+                    <div>
+                        <label for="soil-type" class="block text-gray-700 font-medium mb-1">Your Soil Type:</label>
+                        <select id="soil-type" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-400">
+                            <option value="">Select a soil type</option>
+                            <option value="Loam">Loam</option>
+                            <option value="Sandy">Sandy</option>
+                            <option value="Clay">Clay</option>
+                            <option value="Silt">Silt</option>
+                            <option value="Peat">Peat</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-4 rounded-full transition-colors">
+                        Save Farm Profile
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboard" class="hidden">
+            <!-- Weather Forecast Card -->
+            <div class="card">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Weather Forecast</h2>
+                <div id="weather-section" class="space-y-4">
+                    <!-- Weather data will be dynamically inserted here -->
+                </div>
+            </div>
+
+            <!-- Planting Recommendations Card -->
+            <div class="card">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Planting Recommendations</h2>
+                <div id="recommendations-section" class="text-gray-700">
+                    <p class="text-section">Recommendations will appear here after you save your farm profile.</p>
+                </div>
+            </div>
+
+            <!-- Farm Log Card -->
+            <div class="card">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Farm Log</h2>
+                <form id="log-form" class="space-y-4 mb-6">
+                    <div>
+                        <label for="log-note" class="block text-gray-700 font-medium mb-1">New Log Entry:</label>
+                        <textarea id="log-note" rows="3" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-400" placeholder="Add notes about your crops, progress, etc."></textarea>
+                    </div>
+                    <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-4 rounded-full transition-colors">
+                        Add Log Entry
+                    </button>
+                </form>
+                <div id="log-list" class="space-y-4">
+                    <!-- Log entries will be dynamically inserted here -->
+                    <p id="no-logs" class="text-gray-500 text-center text-sm">No log entries yet. Add your first note!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Custom Modal for user messages -->
+        <div id="modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                <div class="mt-3 text-center">
+                    <h3 id="modal-title" class="text-lg leading-6 font-medium text-gray-900"></h3>
+                    <div class="mt-2 px-7 py-3">
+                        <p id="modal-message" class="text-sm text-gray-500"></p>
+                    </div>
+                    <div class="items-center px-4 py-3">
+                        <button id="modal-close-btn" class="w-full rounded-md border border-transparent shadow-sm px-4 py-2 bg-emerald-600 text-base font-medium text-white hover:bg-emerald-700 focus:outline-none">
+                            OK
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, addDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, query, where, orderBy, getDocs, serverTimestamp, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Set Firebase debug log level
+        setLogLevel('debug');
+
+        // Global variables provided by the Canvas environment
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let db, auth;
+        let userId;
+
+        // --- DOM Elements ---
+        const loadingScreen = document.getElementById('loading');
+        const mainContent = document.getElementById('main-content');
+        const profileSetupSection = document.getElementById('profile-setup');
+        const profileDisplaySection = document.getElementById('profile-display');
+        const dashboardSection = document.getElementById('dashboard');
+        const profileForm = document.getElementById('profile-form');
+        const editProfileBtn = document.getElementById('edit-profile-btn');
+        const logForm = document.getElementById('log-form');
+        const logList = document.getElementById('log-list');
+        const noLogsMessage = document.getElementById('no-logs');
+        const modal = document.getElementById('modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalMessage = document.getElementById('modal-message');
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+
+        // --- Data Mockups ---
+        const soilData = {
+            "Loam": {
+                description: "Loamy soil is an ideal mix of sand, silt, and clay. It's rich in nutrients, retains moisture well, and is easy to work with.",
+                bestCrops: ["Most vegetables", "Fruits", "Wheat", "Maize", "Beans", "Peas"]
+            },
+            "Sandy": {
+                description: "Sandy soil is light, dry, and drains quickly. It warms up fast in spring but can be low in nutrients.",
+                bestCrops: ["Carrots", "Radishes", "Potatoes", "Lettuce", "Strawberries", "Rosemary", "Thyme"]
+            },
+            "Clay": {
+                description: "Clay soil is heavy and holds water well, which can lead to waterlogging. However, it is very rich in nutrients.",
+                bestCrops: ["Cabbage", "Kale", "Broccoli", "Brassicas", "Fruit trees"]
+            },
+            "Silt": {
+                description: "Silty soil is fertile, retains moisture, and is easy to cultivate. It's prone to compaction and can wash away easily.",
+                bestCrops: ["Onions", "Leeks", "Lettuce", "Spinach", "Peas"]
+            },
+            "Peat": {
+                description: "Peat soil is high in organic matter and holds a lot of water. It is often acidic and requires good drainage.",
+                bestCrops: ["Blueberries", "Cranberries", "Cabbage", "Rhododendrons"]
+            }
+        };
+
+        const mockWeatherData = [
+            { day: "Today", temp: "28°C", condition: "Sunny", precipitation: "0%", wind: "10 km/h" },
+            { day: "Tomorrow", temp: "25°C", condition: "Partly Cloudy", precipitation: "20%", wind: "8 km/h" },
+            { day: "Day 3", temp: "23°C", condition: "Rainy", precipitation: "70%", wind: "15 km/h" },
+            { day: "Day 4", temp: "26°C", condition: "Sunny", precipitation: "0%", wind: "12 km/h" },
+            { day: "Day 5", temp: "24°C", condition: "Cloudy", precipitation: "10%", wind: "7 km/h" }
+        ];
+
+        // --- Helper Functions ---
+
+        // Custom modal function to replace alert() and confirm()
+        function showModal(title, message, onClose) {
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            modal.classList.remove('hidden');
+            modalCloseBtn.onclick = () => {
+                modal.classList.add('hidden');
+                if (onClose) onClose();
+            };
+        }
+
+        // --- Firebase Initialization and Authentication ---
+        async function initializeFirebase() {
+            try {
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        await loadFarmProfile();
+                        await setupLogListener();
+                    } else {
+                        // Sign in anonymously if no token is available
+                        if (initialAuthToken) {
+                            await signInWithCustomToken(auth, initialAuthToken);
+                        } else {
+                            await signInAnonymously(auth);
+                        }
+                    }
+                    // Hide loading screen and show main content once auth is ready
+                    loadingScreen.classList.add('hidden');
+                    mainContent.classList.remove('opacity-0');
+                });
+            } catch (error) {
+                console.error("Firebase initialization failed:", error);
+                showModal("Error", "Failed to initialize the application. Please check the console for details.", () => {
+                    loadingScreen.classList.add('hidden');
+                });
+            }
+        }
+
+        // --- Firestore Operations ---
+        async function loadFarmProfile() {
+            if (!userId) {
+                console.error("User ID is not available.");
+                return;
+            }
+
+            const profileDocRef = doc(db, `/artifacts/${appId}/users/${userId}/farm_profile/my_profile`);
+            const profileDoc = await getDoc(profileDocRef);
+
+            if (profileDoc.exists()) {
+                const data = profileDoc.data();
+                displayProfile(data);
+                displayDashboard();
+            } else {
+                displayProfileSetup();
+            }
+        }
+
+        async function saveFarmProfile(e) {
+            e.preventDefault();
+            const location = document.getElementById('location').value;
+            const soilType = document.getElementById('soil-type').value;
+
+            if (!location || !soilType) {
+                showModal("Validation Error", "Please fill out both location and soil type.");
+                return;
+            }
+
+            const profileDocRef = doc(db, `/artifacts/${appId}/users/${userId}/farm_profile/my_profile`);
+            try {
+                await setDoc(profileDocRef, {
+                    location,
+                    soilType
+                });
+                showModal("Success", "Farm profile saved successfully!");
+                await loadFarmProfile();
+            } catch (e) {
+                console.error("Error saving profile: ", e);
+                showModal("Error", "Failed to save profile. Please try again.");
+            }
+        }
+
+        async function setupLogListener() {
+            if (!userId) {
+                console.error("User ID is not available for logs.");
+                return;
+            }
+
+            const logsCollectionRef = collection(db, `/artifacts/${appId}/users/${userId}/farm_logs`);
+            const logsQuery = query(logsCollectionRef);
+
+            onSnapshot(logsQuery, (snapshot) => {
+                const logs = [];
+                snapshot.forEach(doc => {
+                    logs.push({ id: doc.id, ...doc.data() });
+                });
+                renderLogs(logs);
+            }, (error) => {
+                console.error("Error listening for logs:", error);
+                showModal("Error", "Failed to load farm logs in real-time.");
+            });
+        }
+
+        async function addLogEntry(e) {
+            e.preventDefault();
+            const logNote = document.getElementById('log-note').value.trim();
+
+            if (!logNote) {
+                showModal("Validation Error", "Please write a note before saving.");
+                return;
+            }
+
+            const logsCollectionRef = collection(db, `/artifacts/${appId}/users/${userId}/farm_logs`);
+            try {
+                await addDoc(logsCollectionRef, {
+                    note: logNote,
+                    timestamp: serverTimestamp()
+                });
+                document.getElementById('log-note').value = '';
+                showModal("Success", "Log entry added successfully!");
+            } catch (e) {
+                console.error("Error adding log entry: ", e);
+                showModal("Error", "Failed to add log entry. Please try again.");
+            }
+        }
+
+        // --- UI Rendering Functions ---
+
+        function displayProfile(data) {
+            document.getElementById('user-id').textContent = userId;
+            document.getElementById('profile-location').textContent = data.location;
+            document.getElementById('profile-soil-type').textContent = data.soilType;
+            profileSetupSection.classList.add('hidden');
+            profileDisplaySection.classList.remove('hidden');
+        }
+
+        function displayProfileSetup() {
+            profileSetupSection.classList.remove('hidden');
+            profileDisplaySection.classList.add('hidden');
+        }
+
+        function displayDashboard() {
+            dashboardSection.classList.remove('hidden');
+            const soilType = document.getElementById('profile-soil-type').textContent;
+            renderWeather();
+            renderRecommendations(soilType);
+        }
+
+        function renderWeather() {
+            const weatherSection = document.getElementById('weather-section');
+            weatherSection.innerHTML = '';
+            const location = document.getElementById('profile-location').textContent;
+
+            // In a real app, this is where you'd securely call an external API.
+            // For this demo, we use a mock data array.
+            // A secure way to do this for deployment would be via a backend endpoint
+            // that keeps the API key secret.
+            const weatherHTML = mockWeatherData.map(day => `
+                <div class="flex items-center justify-between p-4 bg-white rounded-xl shadow-sm">
+                    <span class="font-medium text-lg text-gray-700">${day.day}</span>
+                    <span class="font-semibold text-2xl text-emerald-600">${day.temp}</span>
+                    <span class="text-gray-500 text-sm">${day.condition}</span>
+                </div>
+            `).join('');
+
+            const disclaimer = `
+                <p class="text-xs text-gray-400 mt-4">
+                    Weather data is simulated for demonstration purposes. A live application would fetch real-time data from a service like Tomorrow.io or OpenWeatherMap.
+                </p>
+            `;
+
+            weatherSection.innerHTML = weatherHTML + disclaimer;
+        }
+
+        function renderRecommendations(soilType) {
+            const recommendationsSection = document.getElementById('recommendations-section');
+            const data = soilData[soilType];
+
+            if (!data) {
+                recommendationsSection.innerHTML = `<p class="text-section">No recommendations found for this soil type.</p>`;
+                return;
+            }
+
+            const crops = data.bestCrops.map(crop => `<li class="list-none text-emerald-600 font-medium before:content-['✓'] before:mr-2 before:text-emerald-400">${crop}</li>`).join('');
+
+            recommendationsSection.innerHTML = `
+                <div class="mb-4">
+                    <p class="font-medium text-gray-800 mb-2">Soil Properties:</p>
+                    <p class="text-section">${data.description}</p>
+                </div>
+                <div>
+                    <p class="font-medium text-gray-800 mb-2">Best Crops to Plant:</p>
+                    <ul class="space-y-2 text-sm">${crops}</ul>
+                </div>
+            `;
+        }
+
+        function renderLogs(logs) {
+            const sortedLogs = logs.sort((a, b) => b.timestamp?.toMillis() - a.timestamp?.toMillis());
+            logList.innerHTML = '';
+
+            if (sortedLogs.length === 0) {
+                noLogsMessage.classList.remove('hidden');
+                return;
+            }
+
+            noLogsMessage.classList.add('hidden');
+
+            sortedLogs.forEach(log => {
+                const date = log.timestamp?.toDate().toLocaleDateString() || 'N/A';
+                co
